@@ -285,7 +285,11 @@ module PRC
 
       fail 'Config filename not set.' if @filename.nil?
 
-      @data = YAML.load_file(File.expand_path(@filename))
+      data = YAML.load_file(File.expand_path(@filename))
+
+      return false unless data
+
+      @data = data
 
       if @data.key?(:file_version)
         @version = @data[:file_version]
