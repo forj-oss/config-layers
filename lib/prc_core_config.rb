@@ -600,6 +600,72 @@ module PRC
 
       config_layers[0][:config].save
     end
+
+    # This function add a config layer at runtime.
+    # The new layer added at runtime, can be removed at runtime
+    # with layer_remove
+    # The name MUST be different than other existing config layer names
+    # This function is typically used by a Child Class or #layer_add.
+    #
+    # *Args*
+    #   - +options+ : Hash data
+    #     - :name     : Required. Name of the layer to add
+    #     - :index    : Config position to use. 0 is the default. 0 is the first
+    #       Config layer use by get.
+    #     - :config   : A Config instance of class type PRC::BaseConfig
+    #     - :set      : Boolean. True if is authorized to set a variable.
+    #     - :load     : Boolean. True if is authorized to load from a file.
+    #     - :save     : Boolean. True if is authorized to save to a file.
+    #     - :file_set : Boolean. True if is authorized to change the file name.
+    #
+    # *returns*
+    #   - true if layer is added.
+    #   OR
+    #   - nil : if layer name already exist
+    def p_layer_add(options)
+      layer = CoreConfig.define_layer(options)
+
+      layer[:init] = false # Runtime layer
+
+      index = 0
+      index = options[:index] if options[:index].is_a?(Fixnum)
+      names = []
+      @config_layers.each { |alayer| names << alayer[:name] }
+
+      return nil if names.include?(layer[:name])
+      @config_layers.insert(index, layer)
+      true
+    end
+
+    # Function to remove a runtime layer.
+    # You cannot remove a predefined layer, created during CoreConfig
+    # instanciation.
+    # This function is typically used by a Child Class or #layer_remove.
+    #
+    # *Args*
+    #   - +options+ : Hash data
+    #     - +:name+ : Name of the layer to remove.
+    #     - +:index+: Index of the layer to remove.
+    #
+    # At least, :name or :index is required.
+    # If both; :name and :index are set, :name is used.
+    # *return*
+    #   - true if layer name is removed.
+    #   OR
+    #   - nil : if not found or invalid.
+    def p_layer_remove(options)
+      index = layer_index(options[:name])
+      index = options[:index] if index.nil?
+
+      return nil if index.nil?
+
+      layer = @config_layers[index]
+
+      return nil if layer.nil? || layer[:init]
+
+      @config_layers.delete_at(index)
+      true
+    end
   end
 
   # private functions usable by child classes
@@ -662,66 +728,23 @@ module PRC
     end
 
     # This function add a config layer at runtime.
-    # The new layer added at runtime, can be removed at runtime
-    # with layer_remove
-    # The name MUST be different than other existing config layer names
     #
-    # *Args*
-    #   - +options+ : Hash data
-    #     - :name     : Required. Name of the layer to add
-    #     - :index    : Config position to use. 0 is the default. 0 is the first
-    #       Config layer use by get.
-    #     - :config   : A Config instance of class type PRC::BaseConfig
-    #     - :set      : Boolean. True if is authorized to set a variable.
-    #     - :load     : Boolean. True if is authorized to load from a file.
-    #     - :save     : Boolean. True if is authorized to save to a file.
-    #     - :file_set : Boolean. True if is authorized to change the file name.
+    # It call an internal private function #p_layer_add
+    # which can be used by redefined in Child class.
     #
-    # *returns*
-    #   - true if layer is added.
-    #   OR
-    #   - nil : if layer name already exist
+    # For options and details, see #p_layer_add
     def layer_add(options)
-      layer = CoreConfig.define_layer(options)
-
-      layer[:init] = false # Runtime layer
-
-      index = 0
-      index = options[:index] if options[:index].is_a?(Fixnum)
-      names = []
-      @config_layers.each { |alayer| names << alayer[:name] }
-
-      return nil if names.include?(layer[:name])
-      @config_layers.insert(index, layer)
-      true
+      p_layer_add(options)
     end
 
     # Function to remove a runtime layer.
-    # You cannot remove a predefined layer, created during CoreConfig
-    # instanciation.
-    # *Args*
-    #   - +options+ : Hash data
-    #     - +:name+ : Name of the layer to remove.
-    #     - +:index+: Index of the layer to remove.
     #
-    # At least, :name or :index is required.
-    # If both; :name and :index are set, :name is used.
-    # *return*
-    #   - true if layer name is removed.
-    #   OR
-    #   - nil : if not found or invalid.
+    # It call an internal private function #p_layer_remove
+    # which can be used by redefined in Child class.
+    #
+    # For options and details, see #p_layer_remove
     def layer_remove(options)
-      index = layer_index(options[:name])
-      index = options[:index] if index.nil?
-
-      return nil if index.nil?
-
-      layer = @config_layers[index]
-
-      return nil if layer.nil? || layer[:init]
-
-      @config_layers.delete_at(index)
-      true
+      p_layer_remove(options)
     end
 
     # Function to define layer options.
