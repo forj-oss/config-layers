@@ -6,6 +6,7 @@ require 'config_layers/version'
 Gem::Specification.new do |spec|
   spec.name          = "config_layers"
   spec.version       = ConfigLayers::VERSION
+  spec.date          = ConfigLayers::DATE
   spec.authors       = ["Christophe Larsonneur"]
   spec.email         = ["clarsonneur@gmail.com"]
 
