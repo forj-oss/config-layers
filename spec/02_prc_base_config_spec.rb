@@ -140,6 +140,8 @@ describe 'class: PRC::BaseConfig,' do
   context 'config.save and config.load' do
     before(:all) do
       @config = PRC::BaseConfig.new(:test1 => { :test2 => 'value' })
+      @file1 = File.join('~', ".lorj_rspec_#{Process.pid}.yaml")
+      @file2 = File.join('~', ".lorj_rspec2_#{Process.pid}.yaml")
     end
 
     it 'save with no parameter should fail' do
@@ -147,9 +149,8 @@ describe 'class: PRC::BaseConfig,' do
     end
 
     it 'save with filename set, save should true' do
-      file = '~/.lorj_rspec.yaml'
-      @config.filename = file
-      filename = File.expand_path(file)
+      @config.filename = @file1
+      filename = File.expand_path(@file1)
 
       expect(@config.filename).to eq(filename)
       expect(@config.save).to equal(true)
@@ -158,11 +159,10 @@ describe 'class: PRC::BaseConfig,' do
     end
 
     it 'save with filename given, returns true, and file saved.' do
-      file = '~/.lorj_rspec2.yaml'
       old_file = @config.filename
-      filename = File.expand_path(file)
+      filename = File.expand_path(@file2)
       @config.version = '1'
-      expect(@config.save(file)).to equal(true)
+      expect(@config.save(@file2)).to equal(true)
       expect(@config.filename).not_to eq(old_file)
       expect(@config.filename).to eq(filename)
     end
@@ -178,21 +178,34 @@ describe 'class: PRC::BaseConfig,' do
 
     it 'load raises if file given is not found.' do
       @config.erase
+      File.delete(@file1) if File.exist?(@file1)
+      expect { @config.load(@file1) }.to raise_error
+      File.delete(@file1) if File.exist?(@file1)
+    end
 
-      expect { @config.load('~/.lorj_rspec.yaml') }.to raise_error
+    it 'load return an empty Config if file is empty.' do
+      @config.erase
+      file = File.expand_path(@file1)
+      File.open(file, 'w') { |thefile| thefile.write('') }
+
+      expect(@config.load(file)).to equal(false)
+      expect(@config.data).to eq({})
+      File.delete(file)
     end
   end
 
   context 'new and save a config, with latest_version initialized' do
     before(:all) do
       @config = PRC::BaseConfig.new({ :test1 => { :test2 => 'value' } }, '1')
+      @file1 = File.join('~', ".lorj_rspec_#{Process.pid}.yaml")
     end
 
     it 'save, file has version set' do
-      file = "~/.lorj_rspec_#{Process.pid}.yaml"
-      @config.filename = file
+      @config.filename = @file1
       @config.save
       @config.erase
+      expect(@config.data).to eq({})
+      expect(@config.version).to eq('1')
       @config.load
       expect(@config.data).to eq(:test1 => { :test2 => 'value' })
       expect(@config.version).to eq('1')
@@ -202,11 +215,11 @@ describe 'class: PRC::BaseConfig,' do
   context 'load and upgrade an old config' do
     before(:all) do
       @config = PRC::BaseConfig.new
+      @file1 = File.join('~', ".lorj_rspec_#{Process.pid}.yaml")
     end
 
     it 'load old config, version is not change without version update' do
-      file = "~/.lorj_rspec_#{Process.pid}.yaml"
-      @config.filename = file
+      @config.filename = @file1
       @config.load
       old_version = @config.version
       old_data = @config.data
@@ -232,11 +245,11 @@ describe 'class: PRC::BaseConfig,' do
   context 'new and save a config, without latest_version initialized' do
     before(:all) do
       @config = PRC::BaseConfig.new(:test1 => { :test2 => 'value' })
+      @file1 = File.join('~', ".lorj_rspec_#{Process.pid}.yaml")
     end
 
     it 'save, file has no version set' do
-      file = "~/.lorj_rspec_#{Process.pid}.yaml"
-      @config.filename = file
+      @config.filename = @file1
       @config.save
       @config.erase
       @config.load
@@ -279,14 +292,15 @@ describe 'class: PRC::BaseConfig,' do
 
     it 'with :file_readonly => true, we cannot save data to a file.' do
       config = PRC::BaseConfig.new(:test => 'toto')
-      file = '~/.rspec_test.yaml'
+      file = File.join('~', ".rspec_test_#{Process.pid}.yaml")
       file_path = File.expand_path(file)
       config.data_options(:file_readonly => true)
-      system('rm -f ~/.rspec_test.yaml')
+      File.delete(file_path) if File.exist?(file_path)
       expect(config.save(file)).to equal(false)
       expect(config.filename).to equal(nil)
       expect { config.load(file) }.to raise_error
       expect(config.filename).to eq(file_path)
+      expect(config.data).to eq(:test => 'toto')
     end
   end
 end
