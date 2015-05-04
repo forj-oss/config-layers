@@ -15,9 +15,9 @@
   #    See the License for the specific language governing permissions and
   #    limitations under the License.
 
-  # require 'byebug'
+  #  require 'byebug'
 
-  # $LOAD_PATH << File.join(File.dirname(__FILE__), '..', 'lib')
+  $LOAD_PATH << File.join(File.dirname(__FILE__), '..', 'lib')
 
   require 'config_layers.rb'
 
@@ -321,6 +321,33 @@
            'deepest layers.' do
           expect(@config.merge(:merge1, :data2)).to eq(:test_runtime => true,
                                                        :test => :test_data2)
+        end
+      end
+
+      context "with config[:merge1] = {:data2 => [:by] }\n"\
+              'and local: :merge1: => {:data2 => [:replaced] }' do
+        before(:all) do
+          @config[:merge1] = { :data2 => [:by] }
+          value = { :data2 => [:replaced] }
+          @config.set(:keys => [:merge1], :value => value, :name => 'local')
+        end
+
+        it 'config.mergeable?(:keys => [:merge1, :data2]) return true, '\
+           'because the first found in the deepest layers is a Hash.' do
+          expect(@config.where?(:merge1, :data2)).to eq(%w(runtime local))
+          expect(@config.mergeable?(:keys => [:merge1, :data2])).to equal(true)
+        end
+
+        it 'config.mergeable?(:keys => [:merge1, :data2], '\
+           ':exclusive => true) return true '\
+           '- All layers data found are Array type.' do
+          expect(@config.mergeable?(:keys => [:merge1, :data2],
+                                    :exclusive => true)).to equal(true)
+        end
+
+        it 'config.merge() return a single data, first found in the '\
+           'deepest layers.' do
+          expect(@config.merge(:merge1, :data2)).to eq([:by])
         end
       end
     end

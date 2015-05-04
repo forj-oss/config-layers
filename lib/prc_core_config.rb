@@ -211,7 +211,10 @@ module PRC
 
         result = result.rh_merge(layer[:config][keys[0..-2]])
       end
-      result[keys[-1]]
+
+      res = result[keys[-1]]
+      return res.merge_cleanup if [Array, Hash].include?(res.class)
+      res
     end
 
     # Return true if at least the first key value found is of type Hash/Array,
