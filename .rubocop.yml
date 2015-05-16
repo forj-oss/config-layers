@@ -31,3 +31,8 @@ Metrics/ClassLength:
 # allow arguments to be longer than 15
 Metrics/AbcSize:
   Max: 40
+
+Metrics/CyclomaticComplexity:
+  Max: 7
+Metrics/PerceivedComplexity:
+  Max: 8

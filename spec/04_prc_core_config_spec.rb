@@ -74,6 +74,40 @@
         expect(@config.layers).to eq(%w(runtime local))
       end
 
+      it 'config.layer_indexes("runtime") return [0]' do
+        expect(@config.layer_indexes('runtime')).to eq([0])
+      end
+
+      it 'config.layer_indexes("local") return [1]' do
+        expect(@config.layer_indexes('local')).to eq([1])
+      end
+
+      it 'config.layer_indexes("test") return nil' do
+        expect(@config.layer_indexes('test')).to equal(nil)
+      end
+
+      it 'config.layer_indexes(%w(local runtime) return [1, 0]' do
+        expect(@config.layer_indexes(%w(local runtime))).to eq([1, 0])
+      end
+
+      it 'config.layer_indexes(%w(runtime local runtime)) return [0, 1, 0]' do
+        expect(@config.layer_indexes(%w(runtime local
+                                        runtime))).to eq([0, 1, 0])
+      end
+
+      it 'config.layer_indexes { |l, i| l[:name] == "local" } return [1]' do
+        expect(@config.layer_indexes do |l, _i|
+          l[:name] == 'local'
+        end).to eq([1])
+      end
+
+      it 'config.layer_indexes { |l, i| %w(local runtime).include?(l[:name])'\
+         ' } return [0, 1]' do
+        expect(@config.layer_indexes do |l, _i|
+          %w(local runtime).include?(l[:name])
+        end).to eq([0, 1])
+      end
+
       it 'config.version("local") return nil' do
         expect(@config.version('local')).to equal(nil)
       end

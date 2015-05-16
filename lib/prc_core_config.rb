@@ -790,21 +790,29 @@ module PRC
     # layer_indexes function
     #
     # * *Args*
-    # - +:name+ : layer to identify.
+    #   - +:name+ : layer to identify.
+    #   - +&block+: loop on layer object & index. index added if yield is true
     #
     # * *Returns*
-    #   first index found or nil.
+    #   array of indexes found or nil.
     #
-    def layer_indexes(names)
-      names = [names] if names.is_a?(String)
-      return nil unless names.is_a?(Array)
-
+    def layer_indexes(names = nil)
       layers = []
 
-      names.each do |name|
-        index = layer_index(name)
-        layers << index unless index.nil?
+      if block_given?
+        @config_layers.each.with_index do |layer, index|
+          layers << index if yield layer, index
+        end
+      else
+        names = [names] if names.is_a?(String)
+        return nil unless names.is_a?(Array)
+
+        names.each do |name|
+          index = layer_index(name)
+          layers << index unless index.nil?
+        end
       end
+
       return layers if layers.length > 0
       nil
     end
