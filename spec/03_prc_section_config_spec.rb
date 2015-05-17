@@ -190,4 +190,93 @@ describe 'class: PRC::SectionConfig,' do
       expect(@config.exist?(:test2)).to equal(true)
     end
   end
+
+  context 'SectionsConfig.new {:sec1 => { :test1 => "value1" }, '\
+          ':sec2 => { :test2 => "value2" }, '\
+          ':default => { :test3 => "value3" }}' do
+    before(:all) do
+      @config = PRC::SectionsConfig.new(:sec1 => { :test1 => 'value1' },
+                                        :sec2 => { :test2 => 'value2' },
+                                        :default => { :test1 => 'value3' })
+    end
+
+    it 'config.exist? return nil' do
+      expect(@config.exist?).to equal(nil)
+    end
+
+    it 'config.exist?(:sec1, :test1) return false.' do
+      expect(@config.exist?(:sec1, :test1)).to equal(false)
+    end
+
+    it 'config.exist?(:sec2, :test2) return false.' do
+      expect(@config.exist?(:sec2, :test2)).to equal(false)
+    end
+
+    it 'config.exist?(:default, :test1) return false.' do
+      expect(@config.exist?(:default, :test1)).to equal(false)
+    end
+
+    it 'config.exist?(:test1) return true.' do
+      expect(@config.exist?(:test1)).to equal(true)
+    end
+
+    it 'config.exist?(:test2) return false.' do
+      expect(@config.exist?(:test1)).to equal(true)
+    end
+
+    it 'config.where?(:test1, "layer") return "layer(default)"' do
+      expect(@config.where?(:test1, 'layer')).to eq('layer(default)')
+    end
+
+    it 'config.where?(:test2, "layer") return "layer"' do
+      expect(@config.where?(:test2, 'layer')).to eq('layer')
+    end
+
+    it 'with option sections = [:sec1], config.where?(:test1, "layer") '\
+       'return "layer(sec1|default)"' do
+      @config.data_options(:sections => [:sec1])
+      expect(@config.where?(:test1, 'layer')).to eq('layer(sec1|default)')
+    end
+
+    it 'with option sections = [:sec2], config.where?(:test2, "layer") '\
+       'return "layer(sec2)"' do
+      @config.data_options(:sections => [:sec2])
+      expect(@config.where?(:test2, 'layer')).to eq('layer(sec2)')
+    end
+
+    it 'with option sections = [:sec2], config.exist?(:test2) return true' do
+      @config.data_options(:sections => nil)
+      expect(@config.exist?(:test2)).to eq(false)
+      @config.data_options(:sections => [:sec2])
+      expect(@config.exist?(:test2)).to eq(true)
+    end
+
+    it 'with option section = [:sec1] and default_section = :sec2, '\
+       'config.where?(:test1, "layer") return "layer(sec1)"' do
+      @config.data_options(:sections => [:sec1], :default_section => :sec2)
+      expect(@config.where?(:test1, 'layer')).to eq('layer(sec1)')
+    end
+
+    it 'and config.where?(:test2, "layer") return "layer(sec2)"' do
+      expect(@config.where?(:test2, 'layer')).to eq('layer(sec2)')
+    end
+
+    it 'and config[:test2] return "value2"' do
+      expect(@config[:test2]).to eq('value2')
+    end
+
+    it 'with option sections = [:sec1], config[:test2] return "value1"' do
+      @config.data_options :sections => [:sec1]
+      expect(@config.where?(:test1, '')).to eq('(sec1|default)')
+      expect(@config[:test1]).to eq('value1')
+    end
+
+    it 'with no options, config[:test2] return "value3"' do
+      @config.data_options :sections => nil
+      expect(@config.where?(:test1, '')).to eq('(default)')
+      expect(@config[:test1]).to eq('value3')
+      @config.data_options :sections => []
+      expect(@config.where?(:test1, '')).to eq('(default)')
+    end
+  end
 end

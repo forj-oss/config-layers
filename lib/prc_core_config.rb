@@ -433,7 +433,10 @@ module PRC
         data_options.merge!(data_opts[index]) if data_opts[index].is_a?(Hash)
 
         config.data_options(data_options)
-        layer_indexes << config_layers[index][:name] if config.exist?(keys)
+
+        name = config.where?(keys, config_layers[index][:name])
+
+        layer_indexes << name if config.exist?(keys)
       end
       return layer_indexes if layer_indexes.length > 0
       false

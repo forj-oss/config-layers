@@ -203,6 +203,24 @@ module PRC
       p_save(filename)
     end
 
+    # where layer helper format Used by CoreConfig where?
+    #
+    # In the context of CoreConfig, this class is a layer with a name.
+    # CoreConfig will query this function to get a layer name.
+    # If the layer needs to add any other data, this function will need to
+    # be redefined.
+    #
+    # * *Args*    :
+    #   - name : name of this layer managed by CoreConfig
+    #
+    # * *Returns* :
+    #   - name: Composed layer name return by the layer to CoreConfig
+    #     It returns simply name.
+    #
+    def where?(_keys, name)
+      name
+    end
+
     # transform keys from string to symbol until deep level. Default is 1.
     #
     # * *Args*    :

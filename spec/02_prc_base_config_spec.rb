@@ -44,6 +44,12 @@ describe 'class: PRC::BaseConfig,' do
       @config = PRC::BaseConfig.new
     end
 
+    it 'config.where?("layer_name") is "layer_name"' do
+      expect(@config.where?(:test1, 'layer_name')).to eq('layer_name')
+      expect(@config.where?(:test1, '')).to eq('')
+      expect(@config.where?(:test1, 'test')).to eq('test')
+    end
+
     it 'should be able to create a key/value in the config object.' do
       @config[:test1] = 'value'
       expect(@config.data).to eq(:test1 => 'value')
