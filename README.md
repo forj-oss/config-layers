@@ -1,16 +1,16 @@
 # ConfigLayers
 
-ConfigLayers is a library which help to manage a complex configuration hierarchy, (Hash of Hashes/Array/...) 
+ConfigLayers is a library which help to manage a complex configuration hierarchy, (Hash of Hashes/Array/...)
 per layers.
 
 * What kind of complexity are we trying to resolve?
 
   If you are using yaml or json, you can write anything in that format in some configuration file.
-  Ex: 
+  Ex:
 
       :global:
         :url: http://url.example.org
-        :options: 
+        :options:
           :timeout: 60
           :port: 4708
       :application
@@ -28,7 +28,7 @@ per layers.
   ConfigLayers simplify this:
 
   - access ':timeout' :
-    
+
       config = PRC::BaseConfig.new(data)
 
       timeout = config[:global, :options, :timeout]
@@ -42,7 +42,7 @@ per layers.
     No need to create the Hash structure to set the ':timeout'
 
   ConfigLayer embed YAML, so you can load and save this data from/to a yaml file...
-  
+
       config.save(filename)
       config.load(filename)
 
@@ -65,7 +65,7 @@ per layers.
 
   If the application run, with the account data loaded, when the application wants to get the timeout data
 
-  you expect to just read it! But you need to check if found in account, use it, otherwise check in user 
+  you expect to just read it! But you need to check if found in account, use it, otherwise check in user
   config, etc... until the application defaults if none of those previous configuration file has the :timeout
   setting...
 
@@ -93,7 +93,7 @@ per layers.
 
           initialize_layers(config_layers)
         end
-        
+
         def define_layer(name, filename)
           config = PRC::BaseConfig.new()
           config.load(filename)
@@ -151,6 +151,17 @@ Or install it yourself as:
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `bin/console` for an interactive prompt that will allow you to experiment.
 
 To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release` to create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+
+## TODO:
+
+* Replace usage of options for setting global data options to layers
+  the call get/set/etc... can add an 'options' parameters
+  This one is used to set function behavior on layers selection, setting of layers specific options
+  and is used as global data for layers. This introduce some misunderstanding between
+  config layers functions behavior and global layers behaviors.
+  So, we need to split these ConfigLayers and layers options by introducing
+  a :global_opts.
+
 
 ## Contributing
 

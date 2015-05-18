@@ -266,7 +266,7 @@ module PRC
     #     - +:index+     : layer index to get data.
     #       If neither :name or :index is set, set will use the
     #       highest layer
-    #     - +:data_opts+ : Array or Hash. Define data options per layer.
+    #     - +:data_opts+  : Array or Hash. Define data options per layer.
     #
     # * *Returns*
     #   - The value attached to the key deleted.
@@ -290,6 +290,7 @@ module PRC
 
       config_layers, data_opts, keys = parameters[0]
 
+      # TODO: Replace usage of options for setting global data options to layers
       # get data options for level 0
       data_options = options.clone.merge!(data_opts[0])
 
