@@ -16,6 +16,14 @@
 
 require 'yaml'
 
+file_dir = File.join(File.dirname(__FILE__), 'compat')
+compat_version = RUBY_VERSION[0..2]
+file = File.basename(__FILE__)
+
+lib = File.join(file_dir, compat_version, file)
+lib = File.join(file_dir, file) unless File.exist?(lib)
+load lib if File.exist?(lib)
+
 module PRC
   # Internal CoreConfig functions
   class CoreConfig
@@ -296,7 +304,7 @@ module PRC
 
       return nil if keys.length == 0
 
-      data_options.delete_if do |key|
+      data_options.delete_if do |key, _|
         [:keys, :names, :indexes, :name, :index].include?(key)
       end
 
@@ -382,7 +390,7 @@ module PRC
         config = config_layers[index][:config]
 
         data_options = options.clone
-        data_options.delete_if do |key|
+        data_options.delete_if do |key, _|
           [:keys, :names, :indexes, :name, :index].include?(key)
         end
         data_options.merge!(data_opts[index])
@@ -428,7 +436,7 @@ module PRC
         config = config_layers[index][:config]
 
         data_options = options.clone
-        data_options.delete_if do |key|
+        data_options.delete_if do |key, _|
           [:keys, :names, :indexes, :name, :index].include?(key)
         end
         data_options.merge!(data_opts[index]) if data_opts[index].is_a?(Hash)
@@ -492,7 +500,7 @@ module PRC
       return nil if keys.length == 0 || keys[0].nil? || config_layers[0].nil?
 
       data_options = options.clone
-      data_options.delete_if do |key|
+      data_options.delete_if do |key, _|
         [:keys, :names, :indexes, :name, :index, :merge].include?(key)
       end
 
@@ -539,7 +547,7 @@ module PRC
 
       return nil if keys.length == 0 || keys[0].nil? || config_layers[0].nil?
 
-      data_options.delete_if do |key|
+      data_options.delete_if do |key, _|
         [:keys, :names, :indexes, :name, :index, :value].include?(key)
       end
 
@@ -1057,22 +1065,6 @@ module PRC
       p_get(:keys => keys, :merge => true)
     end
 
-    # Set function
-    #
-    # * *Args*
-    #   - +keys+ : Array of key path to found
-    # * *Returns*
-    #   - The value set or nil
-    #
-    # ex:
-    # value = CoreConfig.New
-    #
-    # value[:level1, :level2] = 'value'
-    # # => {:level1 => {:level2 => 'value'}}
-    def []=(*keys, value)
-      p_set(:keys => keys, :value => value)
-    end
-
     # Del function
     #
     # * *Args*
@@ -1167,7 +1159,7 @@ module PRC
       return nil if keys.length == 0 || keys[0].nil? || config_layers[0].nil?
 
       data_options = options.clone
-      data_options.delete_if do |key|
+      data_options.delete_if do |key, _|
         [:keys, :names, :indexes, :name, :index, :merge].include?(key)
       end
 
@@ -1235,6 +1227,8 @@ module PRC
       end
       data
     end
+
+    include PRC::CoreConfigRubySpec::Public
 
     private
 

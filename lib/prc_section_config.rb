@@ -17,6 +17,14 @@
 require 'rubygems'
 require 'yaml'
 
+file_dir = File.join(File.dirname(__FILE__), 'compat')
+compat_version = RUBY_VERSION[0..2]
+file = File.basename(__FILE__)
+
+lib = File.join(file_dir, compat_version, file)
+lib = File.join(file_dir, file) unless File.exist?(lib)
+load lib if File.exist?(lib)
+
 module PRC
   # SectionConfig class layer based on BaseConfig.
   #
@@ -37,22 +45,6 @@ module PRC
       return nil if keys.length == 0
       return p_get(:default, *keys) if @data_options[:section].nil?
       p_get(@data_options[:section], *keys)
-    end
-
-    # Set the value of a specific key under a section.
-    # You have to call #data_options(:section => 'MySection')
-    #
-    # * *Args*    :
-    #   - +keys+  : keys to get values from a section set by data_options.
-    #     If section is not set, it will use :default
-    # * *Returns* :
-    #   - key value.
-    # * *Raises* :
-    #   Nothing
-    def []=(*keys, value)
-      return nil if keys.length == 0
-      return p_set(:default, *keys, value) if @data_options[:section].nil?
-      p_set(@data_options[:section], *keys, value)
     end
 
     # Check key existence under a section.
@@ -86,6 +78,8 @@ module PRC
       return p_del(:default, *keys) if @data_options[:section].nil?
       p_del(@data_options[:section], *keys)
     end
+
+    include PRC::SectionConfigRubySpec::Public
   end
 
   # SectionsConfig class layer based on SectionConfig.

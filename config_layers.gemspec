@@ -21,9 +21,19 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency "subhash", '~> 0.1.1'
   spec.add_runtime_dependency "pry"
+  spec.add_runtime_dependency "json"
 
   spec.add_development_dependency "bundler", "~> 1.9"
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency "rspec", "~> 3.1.0"
-  spec.add_development_dependency "rubocop", "~> 0.30.0"
+  spec.add_development_dependency "rdoc"
+  if RUBY_VERSION.match(/1\.8/)
+    spec.add_development_dependency "ruby-debug"
+  elsif RUBY_VERSION.match(/1\.9/)
+    spec.add_development_dependency "debugger"
+    spec.add_development_dependency "rubocop", "~> 0.30.0"
+  else
+    spec.add_development_dependency "byebug"
+    spec.add_development_dependency "rubocop", "~> 0.30.0"
+  end
 end

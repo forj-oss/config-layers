@@ -16,6 +16,14 @@
 
 require 'yaml'
 
+file_dir = File.join(File.dirname(__FILE__), 'compat')
+compat_version = RUBY_VERSION[0..2]
+file = File.basename(__FILE__)
+
+lib = File.join(file_dir, compat_version, file)
+lib = File.join(file_dir, file) unless File.exist?(lib)
+load lib if File.exist?(lib)
+
 module PRC
   # This class is Base config system of lorj.
   #
@@ -162,23 +170,6 @@ module PRC
       p_del(*keys)
     end
 
-    # Set function
-    #
-    # * *Args*
-    #   - +keys+ : set a value in the Array of key path.
-    #
-    # * *Returns*
-    #   - The value set or nil
-    #
-    # ex:
-    #    value = CoreConfig.New
-    #
-    #    value[:level1, :level2] = 'value'
-    #    # => {:level1 => {:level2 => 'value'}}
-    def []=(*keys, value)
-      p_set(*keys, value)
-    end
-
     # Load from a file
     #
     # * *Args*    :
@@ -266,6 +257,9 @@ module PRC
       (@version == @latest_version)
     end
 
+    # Load specific Ruby versionned code.
+    include PRC::BaseConfigRubySpec::Public
+
     private
 
     def p_data_options(options = nil)
@@ -289,13 +283,6 @@ module PRC
       return nil if keys.length == 0
 
       @data.rh_del(*keys)
-    end
-
-    def p_set(*keys, value)
-      return nil if keys.length == 0
-      return p_get(*keys) if @data_options[:data_readonly]
-
-      @data.rh_set(value, keys)
     end
 
     def p_load(file = nil)
@@ -327,5 +314,8 @@ module PRC
       File.open(@filename, 'w+') { |out| YAML.dump(@data_dup, out) }
       true
     end
+
+    # Load specific Ruby versionned code.
+    include PRC::BaseConfigRubySpec::Private
   end
 end
