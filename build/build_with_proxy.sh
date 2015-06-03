@@ -17,7 +17,11 @@
 function usage
 {
  echo "usage is $0 [--help][-t user/repo:version]
-where :
+Script to build a docker image.
+It takes your local setting of $http_proxy to build the image with the same proxy
+If the proxy is not set, the docker image is simply executed, without proxy.
+
+Options :
 - help: is the current help
 - t   : Tag the image built. Respect the tag format use by docker -t option.
 "
@@ -33,6 +37,7 @@ if [ "p$1" = "p-t" ] && [ "p$2" != "" ]
 then
    TAG="-t $2"
 fi
+
 if [ "$http_proxy" = "" ]
 then
    echo "Currently, no proxy is set. Running docker without proxy"
