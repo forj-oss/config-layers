@@ -173,7 +173,7 @@
         expect(@config.where?(:test2, :test)).to eq(['local'])
       end
 
-      it 'config.[:test] = :where set in "runtime".' do
+      it 'config[:test] = :where set in "runtime".' do
         expect(@config[:test] = :where).to eq(:where)
         expect(@config.where?(:test)).to eq(%w(runtime local))
         expect(@config[:test]).to equal(:where)
@@ -271,6 +271,28 @@
         value_runtime = { :data2 => 'value_runtime', :test_runtime => true }
         expect(@config.get(:keys => [:merge1], :merge => true,
                            :names => ['runtime'])).to eq(value_runtime)
+      end
+
+      it 'a child get(:keys => [:test], :name => "local")' do
+        value = { :test => :runtime }
+        expect(@config.set(:keys => [:test],
+                           :value => value,
+                           :name => 'runtime')).to eq(value)
+        expect(@config.where?(:test)).to eq(%w(runtime local))
+        expect(@config[:test]).to eq(value)
+        expect(@config.get(:keys => [:test],
+                           :name => 'local')).to eq(:found_local)
+      end
+
+      it 'config.each(:name => "local") shows list of keys to '\
+         '[:test, :test2, :merge1]' do
+        val = []
+
+        @config.each(:name => 'local') do |k, _v|
+          val << k
+        end
+        # Ruby 1.8 requires sort, as no garantee about hash order.
+        expect(val.sort).to eq([:test, :test2, :merge1].sort)
       end
 
       context "with config[:merge1] = {:data2 => {:test_runtime => true} }\n"\

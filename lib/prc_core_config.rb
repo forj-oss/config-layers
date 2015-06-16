@@ -1228,6 +1228,33 @@ module PRC
       data
     end
 
+    # Function to loop in existing data in a mere view of data.
+    #
+    # merge can return data only if at least one key value accross layers
+    # are of type Hash or Array.
+    # * *Args*
+    #   - +options+      : Hash of how to get the data
+    #     - +:name+      : layer to get data.
+    #     - +:index+     : layer index to get data.
+    #       If neither :name[s] or :index[es] is set, each will use all
+    #       layers
+    #     - +:data_opts+ : Array or Hash. Define data options per layer.
+    #
+    def each(options)
+      parameters = _nameindex_common_options_get(options)
+      return nil if parameters.nil?
+
+      config_layers, = parameters[0]
+
+      return nil unless block_given?
+
+      config_layers.each do |layer|
+        layer[:config].data.each do |k, v|
+          yield(k, v)
+        end
+      end
+    end
+
     include PRC::CoreConfigRubySpec::Public
 
     private
