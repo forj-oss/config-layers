@@ -249,6 +249,9 @@ module PRC
     # Print a representation of the Layer data
     def to_s
       msg = format("File : %s\n", @filename)
+      unless latest_version.nil? && version.nil?
+        msg += format("version : '#{version}' (latest '#{latest_version}')\n")
+      end
       msg += data.to_yaml
       msg
     end
